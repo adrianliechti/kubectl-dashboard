@@ -5,20 +5,20 @@ import (
 	"crypto/tls"
 	"embed"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/fs"
 	"net"
 	"net/http"
 	"time"
 
+	"github.com/adrianliechti/loop/pkg/kubernetes"
+
 	"github.com/pkg/browser"
-	"github.com/samber/lo"
 	"github.com/spf13/pflag"
 	"golang.org/x/net/xsrftoken"
 
-	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
+	"k8s.io/utils/ptr"
 
 	"k8s.io/dashboard/certificates"
 	"k8s.io/dashboard/certificates/ecdsa"
@@ -40,12 +40,15 @@ var (
 )
 
 func main() {
+	k, err := kubernetes.New()
+
+	if err != nil {
+		panic(err)
+	}
+
 	// https://github.com/kubernetes/dashboard/blob/38e970c366d8c32165ff6c4faa3e774efceeb762/modules/api/pkg/args/args.go#L74
 	if args.KubeconfigPath() == "" {
-		ret := clientcmd.NewDefaultPathOptions()
-		kubeconfig := ret.GetDefaultFilename()
-
-		pflag.Set("kubeconfig", kubeconfig)
+		pflag.Set("kubeconfig", kubernetes.ConfigPath())
 	}
 
 	client.Init(
@@ -60,9 +63,6 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-
-	csrf.Ensure()
-	token, _ := getTokenFromKubeconfig(args.KubeconfigPath())
 
 	api, err := handler.CreateHTTPAPIHandler(integration.NewIntegrationManager())
 
@@ -106,6 +106,14 @@ func main() {
 	mux.Handle("/", http.FileServerFS(fs))
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token := client.GetBearerToken(r)
+
+		if token != "" {
+			if creds, err := k.Credentials(); err == nil {
+				token = creds.Token
+			}
+		}
+
 		if token != "" {
 			client.SetAuthorizationHeader(r, token)
 		}
@@ -151,7 +159,13 @@ func main() {
 }
 
 func handleConfig(w http.ResponseWriter, r *http.Request) {
-	result := &Config{
+	type Response struct {
+		ServerTime int64  `json:"serverTime"`
+		UserAgent  string `json:"userAgent"`
+		Version    string `json:"version"`
+	}
+
+	result := &Response{
 		ServerTime: time.Now().UTC().UnixNano() / 1e6,
 		UserAgent:  name,
 		Version:    version,
@@ -162,7 +176,20 @@ func handleConfig(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleSystemBanner(w http.ResponseWriter, r *http.Request) {
-	result := &SystemBanner{
+	type SystemBannerSeverity string
+
+	type Response struct {
+		Message  string               `json:"message"`
+		Severity SystemBannerSeverity `json:"severity"`
+	}
+
+	const (
+		SystemBannerSeverityInfo    SystemBannerSeverity = "INFO"
+		SystemBannerSeverityWarning SystemBannerSeverity = "WARNING"
+		SystemBannerSeverityError   SystemBannerSeverity = "ERROR"
+	)
+
+	result := &Response{
 		Message:  "",
 		Severity: SystemBannerSeverityInfo,
 	}
@@ -264,15 +291,27 @@ func handleSettingsCanI(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleSettings(w http.ResponseWriter, r *http.Request) {
-	result := &Settings{
-		ClusterName:                      lo.ToPtr(""),
-		ItemsPerPage:                     lo.ToPtr(10),
-		LabelsLimit:                      lo.ToPtr(3),
-		LogsAutoRefreshTimeInterval:      lo.ToPtr(5),
-		ResourceAutoRefreshTimeInterval:  lo.ToPtr(10),
-		DisableAccessDeniedNotifications: lo.ToPtr(false),
-		HideAllNamespaces:                lo.ToPtr(false),
-		DefaultNamespace:                 lo.ToPtr("default"),
+	type Response struct {
+		ClusterName                      *string  `json:"clusterName,omitempty"`
+		ItemsPerPage                     *int     `json:"itemsPerPage,omitempty"`
+		LabelsLimit                      *int     `json:"labelsLimit,omitempty"`
+		LogsAutoRefreshTimeInterval      *int     `json:"logsAutoRefreshTimeInterval,omitempty"`
+		ResourceAutoRefreshTimeInterval  *int     `json:"resourceAutoRefreshTimeInterval,omitempty"`
+		DisableAccessDeniedNotifications *bool    `json:"disableAccessDeniedNotifications,omitempty"`
+		HideAllNamespaces                *bool    `json:"hideAllNamespaces,omitempty"`
+		DefaultNamespace                 *string  `json:"defaultNamespace,omitempty"`
+		NamespaceFallbackList            []string `json:"namespaceFallbackList,omitempty"`
+	}
+
+	result := &Response{
+		ClusterName:                      ptr.To(""),
+		ItemsPerPage:                     ptr.To(10),
+		LabelsLimit:                      ptr.To(3),
+		LogsAutoRefreshTimeInterval:      ptr.To(5),
+		ResourceAutoRefreshTimeInterval:  ptr.To(10),
+		DisableAccessDeniedNotifications: ptr.To(false),
+		HideAllNamespaces:                ptr.To(false),
+		DefaultNamespace:                 ptr.To("default"),
 		NamespaceFallbackList:            []string{"default"},
 	}
 
@@ -298,7 +337,15 @@ func handleSettingsPinnedResourcesCanI(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleSettingsPinnedResources(w http.ResponseWriter, r *http.Request) {
-	result := []PinnedResource{}
+	type Response struct {
+		Kind        string `json:"kind"`
+		Name        string `json:"name"`
+		DisplayName string `json:"displayName"`
+		Namespaced  bool   `json:"namespaced"`
+		Namespace   string `json:"namespace,omitempty"`
+	}
+
+	result := []Response{}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
@@ -306,69 +353,4 @@ func handleSettingsPinnedResources(w http.ResponseWriter, r *http.Request) {
 
 func handleSettingsSavePinnedResources(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusBadRequest)
-}
-
-type Config struct {
-	ServerTime int64  `json:"serverTime"`
-	UserAgent  string `json:"userAgent"`
-	Version    string `json:"version"`
-}
-
-type Settings struct {
-	ClusterName                      *string  `json:"clusterName,omitempty"`
-	ItemsPerPage                     *int     `json:"itemsPerPage,omitempty"`
-	LabelsLimit                      *int     `json:"labelsLimit,omitempty"`
-	LogsAutoRefreshTimeInterval      *int     `json:"logsAutoRefreshTimeInterval,omitempty"`
-	ResourceAutoRefreshTimeInterval  *int     `json:"resourceAutoRefreshTimeInterval,omitempty"`
-	DisableAccessDeniedNotifications *bool    `json:"disableAccessDeniedNotifications,omitempty"`
-	HideAllNamespaces                *bool    `json:"hideAllNamespaces,omitempty"`
-	DefaultNamespace                 *string  `json:"defaultNamespace,omitempty"`
-	NamespaceFallbackList            []string `json:"namespaceFallbackList,omitempty"`
-}
-
-type PinnedResource struct {
-	Kind        string `json:"kind"`
-	Name        string `json:"name"`
-	DisplayName string `json:"displayName"`
-	Namespaced  bool   `json:"namespaced"`
-	Namespace   string `json:"namespace,omitempty"`
-}
-
-type SystemBanner struct {
-	Message  string               `json:"message"`
-	Severity SystemBannerSeverity `json:"severity"`
-}
-
-type SystemBannerSeverity string
-
-const (
-	SystemBannerSeverityInfo    SystemBannerSeverity = "INFO"
-	SystemBannerSeverityWarning SystemBannerSeverity = "WARNING"
-	SystemBannerSeverityError   SystemBannerSeverity = "ERROR"
-)
-
-func getTokenFromKubeconfig(kubeconfigPath string) (string, error) {
-	config, err := clientcmd.LoadFromFile(kubeconfigPath)
-
-	if err != nil {
-		return "", err
-	}
-
-	context, ok := config.Contexts[config.CurrentContext]
-
-	if !ok {
-		return "", errors.New("no context found in kubeconfig")
-	}
-
-	auth, ok := config.AuthInfos[context.AuthInfo]
-
-	if !ok {
-		return "", errors.New("no auth info found in kubeconfig")
-	}
-
-	if auth.Token == "" {
-		return "", errors.New("no token found in kubeconfig")
-	}
-
-	return auth.Token, nil
 }
