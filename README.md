@@ -1,17 +1,31 @@
-# Kubernetes Dashboard in a Box
-
 > Project Status: Early Proof of Concept
 
-This is a single-binary version of the [Kubernetes Dashboard](https://github.com/kubernetes/dashboard/) designed for temporary local execution.
+# Kubernetes Dashboard Plugins
 
-## Develop
+This is a kubectl plugin of the [Kubernetes Dashboard](https://github.com/kubernetes/dashboard/)
 
-#### Create KinD Cluster
+
+## Run
 
 ```bash
-kind create cluster
+kubectl dashboard
+```
 
-kubectl create serviceaccount dashboard -n default
-kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=default:dashboard
-kubectl -n default create token dashboard
+## Installation
+
+#### MacOS / Linux
+
+[Homebrew](https://brew.sh)
+
+```
+brew install adrianliechti/tap/kubectl-dashboard
+```
+
+#### Windows
+
+[Scoop](https://scoop.sh)
+
+```shell
+scoop bucket add adrianliechti https://github.com/adrianliechti/scoop-bucket
+scoop install adrianliechti/kubectl-dashboard
 ```

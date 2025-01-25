@@ -16,3 +16,9 @@ tasks:
       - tar -xvf k8s_dashboard.tar.gz --strip-components=1 public/en
       - rm k8s_dashboard.tar.gz
       - mv ./en ./public
+  
+  generate-token:
+    cmds:
+      - kubectl create serviceaccount dashboard -n default -o yaml --dry-run=client | kubectl apply -f -
+      - kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=default:dashboard -o yaml --dry-run=client | kubectl apply -f -
+      - kubectl create token dashboard -n default
