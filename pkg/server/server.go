@@ -48,7 +48,6 @@ func New() (*Server, error) {
 	}
 
 	if host, port, err := net.SplitHostPort(args.Address()); err == nil {
-		println("set insecure", host, port)
 		pflag.Set("insecure-bind-address", host)
 		pflag.Set("insecure-port", port)
 	}
