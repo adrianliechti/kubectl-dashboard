@@ -25,4 +25,4 @@ go.work.sum
 .env
 
 # dashboard web ui
-/public
+/pkg/server/public
