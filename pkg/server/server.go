@@ -11,11 +11,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/adrianliechti/kubectl-dashboard/pkg/config"
+
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 	"github.com/adrianliechti/loop/pkg/system"
-	"github.com/spf13/pflag"
 
 	"github.com/pkg/browser"
+	"github.com/spf13/pflag"
 	"golang.org/x/net/xsrftoken"
 
 	"k8s.io/utils/ptr"
@@ -32,9 +34,6 @@ import (
 var (
 	//go:embed public
 	public embed.FS
-
-	name    = "loop-dashboard"
-	version = "0.0.1"
 )
 
 type Server struct {
@@ -53,7 +52,7 @@ func New() (*Server, error) {
 	}
 
 	client.Init(
-		client.WithUserAgent(name),
+		client.WithUserAgent(config.UserAgent),
 		client.WithKubeconfig(args.KubeconfigPath()),
 		client.WithMasterUrl(args.ApiServerHost()),
 		client.WithInsecureTLSSkipVerify(args.ApiServerSkipTLSVerify()),
@@ -115,7 +114,7 @@ func New() (*Server, error) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := client.GetBearerToken(r)
 
-		if token != "" {
+		if token == "" {
 			if creds, err := k.Credentials(); err == nil {
 				token = creds.Token
 			}
@@ -183,8 +182,8 @@ func handleConfig(w http.ResponseWriter, r *http.Request) {
 
 	result := &Response{
 		ServerTime: time.Now().UTC().UnixNano() / 1e6,
-		UserAgent:  name,
-		Version:    version,
+		UserAgent:  config.UserAgent,
+		Version:    config.Version,
 	}
 
 	w.WriteHeader(http.StatusOK)

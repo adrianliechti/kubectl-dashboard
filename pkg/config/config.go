@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	Version   = "0.0.1"
-	UserAgent = "loop-dashboard"
+	Version   = "0.3.0"
+	UserAgent = "kubectl-dashboard"
 )
 
 func init() {
