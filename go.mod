@@ -19,11 +19,9 @@ require (
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/net v0.34.0
 	k8s.io/dashboard/api v0.0.0-00010101000000-000000000000
-	k8s.io/dashboard/certificates v0.0.0-00010101000000-000000000000
 	k8s.io/dashboard/client v0.0.0-00010101000000-000000000000
 	k8s.io/dashboard/csrf v0.0.0-00010101000000-000000000000
 	k8s.io/dashboard/types v0.0.0-00010101000000-000000000000
-	k8s.io/klog/v2 v2.130.1
 	k8s.io/utils v0.0.0-20241210054802-24370beab758
 )
 
@@ -122,6 +120,7 @@ require (
 	k8s.io/component-base v0.32.1 // indirect
 	k8s.io/dashboard/errors v0.0.0-00010101000000-000000000000 // indirect
 	k8s.io/dashboard/helpers v0.0.0-00010101000000-000000000000 // indirect
+	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20241212222426-2c72e554b1e7 // indirect
 	k8s.io/kubectl v0.32.1 // indirect
 	sigs.k8s.io/gateway-api v1.2.1 // indirect
