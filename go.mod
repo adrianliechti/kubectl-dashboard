@@ -1,28 +1,30 @@
 module github.com/adrianliechti/kubectl-dashboard
 
 replace (
-	k8s.io/dashboard/api => github.com/kubernetes/dashboard/modules/api v0.0.0-20250124132921-38e970c366d8
-	k8s.io/dashboard/certificates => github.com/kubernetes/dashboard/modules/common/certificates v0.0.0-20250124132921-38e970c366d8
-	k8s.io/dashboard/client => github.com/kubernetes/dashboard/modules/common/client v0.0.0-20250124132921-38e970c366d8
-	k8s.io/dashboard/csrf => github.com/kubernetes/dashboard/modules/common/csrf v0.0.0-20250124132921-38e970c366d8
-	k8s.io/dashboard/errors => github.com/kubernetes/dashboard/modules/common/errors v0.0.0-20250124132921-38e970c366d8
-	k8s.io/dashboard/helpers => github.com/kubernetes/dashboard/modules/common/helpers v0.0.0-20250124132921-38e970c366d8
-	k8s.io/dashboard/tools => github.com/kubernetes/dashboard/modules/common/tools v0.0.0-20250124132921-38e970c366d8
-	k8s.io/dashboard/types => github.com/kubernetes/dashboard/modules/common/types v0.0.0-20250124132921-38e970c366d8
+	k8s.io/dashboard/api => github.com/kubernetes/dashboard/modules/api v0.0.0-20250512041915-b0c1c0fa2760
+	k8s.io/dashboard/certificates => github.com/kubernetes/dashboard/modules/common/certificates v0.0.0-20250512041915-b0c1c0fa2760
+	k8s.io/dashboard/client => github.com/kubernetes/dashboard/modules/common/client v0.0.0-20250512041915-b0c1c0fa2760
+	k8s.io/dashboard/csrf => github.com/kubernetes/dashboard/modules/common/csrf v0.0.0-20250512041915-b0c1c0fa2760
+	k8s.io/dashboard/errors => github.com/kubernetes/dashboard/modules/common/errors v0.0.0-20250512041915-b0c1c0fa2760
+	k8s.io/dashboard/helpers => github.com/kubernetes/dashboard/modules/common/helpers v0.0.0-20250512041915-b0c1c0fa2760
+	k8s.io/dashboard/tools => github.com/kubernetes/dashboard/modules/common/tools v0.0.0-20250512041915-b0c1c0fa2760
+	k8s.io/dashboard/types => github.com/kubernetes/dashboard/modules/common/types v0.0.0-20250512041915-b0c1c0fa2760
 )
 
-go 1.23.5
+go 1.24.2
+
+toolchain go1.24.3
 
 require (
-	github.com/adrianliechti/loop v0.18.0
+	github.com/adrianliechti/loop v0.19.0
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
-	github.com/spf13/pflag v1.0.5
-	golang.org/x/net v0.34.0
+	github.com/spf13/pflag v1.0.6
+	golang.org/x/net v0.40.0
 	k8s.io/dashboard/api v0.0.0-00010101000000-000000000000
 	k8s.io/dashboard/client v0.0.0-00010101000000-000000000000
 	k8s.io/dashboard/csrf v0.0.0-00010101000000-000000000000
 	k8s.io/dashboard/types v0.0.0-00010101000000-000000000000
-	k8s.io/utils v0.0.0-20241210054802-24370beab758
+	k8s.io/utils v0.0.0-20250502105355-0f33e8f1c979
 )
 
 require (
@@ -91,6 +93,7 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.61.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
+	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/samber/lo v1.47.0 // indirect
 	github.com/spf13/cobra v1.8.1 // indirect
@@ -100,29 +103,30 @@ require (
 	github.com/xlab/treeprint v1.2.0 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	golang.org/x/arch v0.13.0 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
+	golang.org/x/crypto v0.38.0 // indirect
 	golang.org/x/oauth2 v0.25.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/term v0.28.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/term v0.32.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
+	golang.org/x/tools v0.32.0 // indirect
 	google.golang.org/protobuf v1.36.3 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/igm/sockjs-go.v2 v2.1.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.32.1 // indirect
-	k8s.io/apiextensions-apiserver v0.32.1 // indirect
-	k8s.io/apimachinery v0.32.1 // indirect
-	k8s.io/cli-runtime v0.32.1 // indirect
-	k8s.io/client-go v0.32.1 // indirect
-	k8s.io/component-base v0.32.1 // indirect
+	k8s.io/api v0.32.3 // indirect
+	k8s.io/apiextensions-apiserver v0.32.3 // indirect
+	k8s.io/apimachinery v0.32.3 // indirect
+	k8s.io/cli-runtime v0.32.3 // indirect
+	k8s.io/client-go v0.32.3 // indirect
+	k8s.io/component-base v0.32.3 // indirect
 	k8s.io/dashboard/errors v0.0.0-00010101000000-000000000000 // indirect
 	k8s.io/dashboard/helpers v0.0.0-00010101000000-000000000000 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20241212222426-2c72e554b1e7 // indirect
-	k8s.io/kubectl v0.32.1 // indirect
+	k8s.io/kubectl v0.32.3 // indirect
 	sigs.k8s.io/gateway-api v1.2.1 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/kustomize/api v0.18.0 // indirect

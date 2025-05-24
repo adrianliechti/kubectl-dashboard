@@ -10,7 +10,7 @@ tasks:
   download-webui:
     cmds:
       - rm -rf public
-      - docker create --name k8s_dashboard docker.io/kubernetesui/dashboard-web:1.6.1
+      - docker create --name k8s_dashboard docker.io/kubernetesui/dashboard-web:1.6.2
       - docker export k8s_dashboard -o k8s_dashboard.tar.gz
       - docker remove k8s_dashboard
       - tar -xvf k8s_dashboard.tar.gz --strip-components=1 public/en
